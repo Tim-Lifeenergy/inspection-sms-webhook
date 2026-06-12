@@ -1,0 +1,36 @@
+import twilio from "twilio";
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  const { name, phone, email, address, message } = req.body;
+
+  const client = twilio(
+    process.env.TWILIO_SID,
+    process.env.TWILIO_AUTH
+  );
+
+  const text = `
+New Inspection Request:
+Name: ${name}
+Phone: ${phone}
+Email: ${email}
+Address: ${address}
+Message: ${message}
+  `;
+
+  try {
+    await client.messages.create({
+      body: text,
+      from: process.env.TWILIO_NUMBER,
+      to: "+1YOURCELLPHONE"
+    });
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "SMS failed" });
+  }
+}
