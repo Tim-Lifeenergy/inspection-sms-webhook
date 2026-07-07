@@ -1,9 +1,10 @@
-package.json
 {
   "name": "inspection-sms-webhook",
   "version": "1.0.0",
+  "description": "SMS webhook for inspection requests",
+  "main": "api/sms.js",
+  "type": "module",
   "dependencies": {
     "twilio": "^4.0.0"
   }
 }
-
