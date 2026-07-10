@@ -6,6 +6,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Parse JSON body correctly for Vercel
+  const body = await req.json();
+
   const {
     name,
     phone,
@@ -14,7 +17,7 @@ export default async function handler(req, res) {
     inspection_type,
     preferred_datetime,
     notes
-  } = req.body;
+  } = body;
 
   // Validate required fields
   if (!name || !phone || !email || !address || !inspection_type) {
@@ -51,4 +54,3 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ success: true });
 }
-
