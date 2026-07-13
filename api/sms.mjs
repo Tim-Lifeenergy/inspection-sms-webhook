@@ -6,7 +6,7 @@ import { Resend } from 'resend';
 import twilio from 'twilio';
 
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.com");
+res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.vercel.app");
 res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
