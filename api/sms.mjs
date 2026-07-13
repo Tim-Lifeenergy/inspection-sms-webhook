@@ -6,16 +6,27 @@ import { Resend } from 'resend';
 import twilio from 'twilio';
 
 export default async function handler(req, res) {
-res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.vercel.app");
-res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Parse JSON body correctly for Vercel
-  const body = await req.json();
+  // Correct JSON parsing for Node.js runtime
+  let rawBody = '';
+  req.on('data', chunk => {
+    rawBody += chunk;
+  });
+
+  await new Promise(resolve => req.on('end', resolve));
+
+  const body = JSON.parse(rawBody);
 
   const {
     name,
@@ -27,12 +38,10 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     notes
   } = body;
 
-  // Validate required fields
   if (!name || !phone || !email || !address || !inspection_type) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Send email notification via Resend
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   await resend.emails.send({
@@ -51,7 +60,6 @@ res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     `
   });
 
-  // Send SMS notification via Twilio
   const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH);
 
   await client.messages.create({
