@@ -27,15 +27,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    const {
-      name,
-      phone,
-      email,
-      projectAddress,
-      inspectionType,
-      preferredDateTime,
-      notes
-    } = req.body;
+ const body = await req.json();
+
+const {
+  name,
+  phone,
+  email,
+  projectAddress,
+  inspectionType,
+  preferredDateTime,
+  notes
+} = body;
+   
 
     // 4️⃣ Send email through Resend
     await resend.emails.send({
