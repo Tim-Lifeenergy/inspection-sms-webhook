@@ -10,13 +10,18 @@ const twilioClient = twilio(
 );
 
 export default async function handler(req, res) {
-  if (req.method === "OPTIONS") {
+
+  // 1️⃣ Global CORS headers (always applied)
   res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.com");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  return res.status(200).end();
-}
 
+  // 2️⃣ Preflight request (browser sends this before POST)
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  // 3️⃣ Only allow POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -32,7 +37,7 @@ export default async function handler(req, res) {
       notes
     } = req.body;
 
-    // 1️⃣ Send email through Resend
+    // 4️⃣ Send email through Resend
     await resend.emails.send({
       from: "Tim@lifeenergyinspections.com",
       to: "Tim@lifeenergyinspections.com",
@@ -49,19 +54,16 @@ export default async function handler(req, res) {
       `
     });
 
-    // 2️⃣ Send SMS through Twilio
+    // 5️⃣ Send SMS through Twilio
     await twilioClient.messages.create({
       body: `New IECC inspection request from ${name}. Address: ${projectAddress}.`,
       from: process.env.TWILIO_PHONE_NUMBER,
       to: phone
     });
 
-    // 3️⃣ Respond to browser (CORS-safe)
-    res.setHeader("Access-Control-Allow-Origin", "https://lifeenergyinspections.com");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
+    // 6️⃣ Respond to browser
     return res.status(200).json({ success: true });
+
   } catch (error) {
     console.error("Webhook error:", error);
     return res.status(500).json({ error: "Internal server error" });
